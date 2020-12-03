@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="ScoreMapper">
+
+	<select id="selectScore" resultType="scorevo">
+		Select l.lec_name, s.stu_name, s.stu_num, s.stu_major
+		From (select lec_id, lec_name from lecture where lec_prof=#{prof_num}) l, register_l r, student s
+		Where l.lec_id = r.reg_lec
+		and s.stu_num = r.reg_stu
+		and r.reg_sem = (select lec_sem
+			    from (select lec_sem 
+			             from lecture
+			             order by lec_id desc)
+			    where rownum = 1)
+		and #{prof_password} = (select pkg_crypto.decrypt(prof_password) 
+			     from professor 
+			     where prof_num = #{prof_num})
+		
+	</select>
+	
+
+	<insert id="insertScore">
+		insert into result(res_reg, mid_exam, final_exam, assignment, attendence)
+		values(
+				(select reg_id 
+					from register_l 
+					where reg_lec in (select lec_id from lecture where lec_name = #{lec_name})
+					and reg_stu in (select stu_num from student where stu_name = #{stu_name})),
+				#{mid_exam}, 
+				#{final_exam}, 
+				#{assignment}, 
+				#{attendence} 
+			)
+	</insert>
+
+
+	<select id="selectScored" resultType="scoredvo">
+		select r.*, lec_name, lec_sem, lec_maj
+		from result r, lecture, register_l
+		where reg_stu = #{stu_num} and reg_id = res_reg and reg_lec = lec_id
+        and #{stu_password} = (select pkg_crypto.decrypt(stu_password) from student where stu_num = #{stu_num})
+	</select>
+	
+	<select id="selectComplete" resultType="scoredvo">
+		select reg_stu, lec_name
+		from register_l, lecture, result
+		where lec_prof = #{prof_num}
+        and lec_id = reg_lec
+		and reg_sem = (select lec_sem
+						from (select lec_sem 
+			             from lecture
+			             order by lec_id desc)
+						where rownum = 1)
+		and reg_id = res_reg
+	</select>
+</mapper>
+
+

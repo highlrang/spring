@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="MajorMapper">
+  
+  <select id="selectMajor" resultType="majorvo">
+  	select dept_name, upper_dept from dept
+  </select>
+  
+  <select id="selectCourse" resultType="coursevo">
+   	select lec_name, prof_name as lec_prof, lec_time, lec_sem
+	from lecture, professor
+	where lec_maj = #{maj_name}
+    and lec_sem = (select lec_sem
+                    from (select lec_sem 
+			             from lecture
+			             order by lec_id desc)
+                    where rownum = 1)
+    and lec_prof = prof_num
+  </select>
+  
+  <select id="selectMinCount" resultType="integer">
+  	select MIN(reg_count) reg_count
+  	from register_l, lecture
+  	where lec_name=#{lec_name}
+  	and reg_lec = lec_id
+  </select>
+  
+  <select id="selectMaxCount" resultType="registervo">
+  	select (select max(reg_count) from register_l where reg_lec = lec_id) reg_count, lec_limit 
+	from lecture
+	where lec_name=#{lec_name} and lec_sem=#{lec_sem}
+  </select>
+  
+  <insert id="insertRegister">
+	  insert into register_l(reg_id, reg_stu, reg_lec, reg_sem, reg_count) 
+	  values( 
+	  (select MAX(reg_id) + 1 from register_l),
+	  #{stu_num}, 
+	  (select lec_id from lecture where lec_name=#{lec_name} and lec_sem=#{lec_sem}), 
+	  #{lec_sem},
+	  #{reg_count}
+	  )
+  </insert>
+  
+  <select id="selectRegistered" resultType="registeredvo">
+	select lec_name, lec_sem, lec_maj
+	from lecture, register_l
+	where reg_stu = #{stu_number} 
+	and lec_id = reg_lec
+	and lec_sem=(select lec_sem
+				from (select lec_sem 
+			             from lecture
+			             order by lec_id desc)
+			    where rownum = 1)	
+	
+	<!--
+	reg_sem 이 2020년 2학기인 것은 lec_sem이 2020년 1학기 강의가 있어서
+	lec_sem이 2020년 2학기인 것을 기준으로 "일단" 해놓음		
+ 	 --> 
+  </select>
+</mapper>

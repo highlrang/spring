@@ -1,0 +1,40 @@
+@charset "EUC-KR";
+
+input[type=button]{
+	border: white;
+	
+	border-bottom: 1px solid black;
+	background-color:rgba(0,0,0,0);
+	padding : 3%;
+}
+
+input[type=submit]{
+	border-radius:5px;
+	border: 1px solid black;
+	background-color:rgba(0,0,0,0);
+	padding : 1%;
+}
+
+
+
+
+input[type=text]{
+	border-radius:10px;
+	border: 2px solid lightgray;
+	padding: 2% 2% 2% 2%;
+	width: 100%;
+
+}
+
+input[type=password]{
+	border-radius:10px;
+	border: 2px solid lightgray;
+	padding: 2% 2% 2% 2%;
+	width: 100%;
+}
+
+input.menu{
+	border: white;
+	padding: 2%;
+	background-color: white;
+}

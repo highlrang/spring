@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="LoginMapper">
+
+	<select id="selectStudent" resultType="loginvo">
+		select stu_name, stu_phone, stu_email, stu_major, stu_minor
+		from student
+		where stu_num = #{stu_num} and #{stu_password} = (select pkg_crypto.decrypt(stu_password) from student where stu_num = #{stu_num})
+	</select>
+	
+	<select id="selectProfessor" resultType="loginvo">
+		select prof_name, prof_maj, prof_email, prof_phone
+		from professor
+		where prof_num = #{prof_num} and #{prof_password} = (select pkg_crypto.decrypt(prof_password) from professor where prof_num = #{prof_num})
+	</select>
+	
+	<select id="selectStuByNum" resultType="loginvo">
+		select stu_name, stu_phone, stu_email, stu_major, stu_minor
+		from student
+		where stu_num = #{stu_num}
+	</select>
+	
+	<select id="selectProfByNum" resultType="loginvo">
+		select prof_name, prof_maj, prof_email, prof_phone
+		from professor
+		where prof_num = #{prof_num}
+	</select>
+</mapper>
