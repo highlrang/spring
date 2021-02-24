@@ -4,7 +4,7 @@
 + 주석 중심으로 살펴봐주세요.
 
 ## Controller
-https://github.com/highlrang/spring/haksa/src/main/java/com/myproject/myweb/RegisterController.java
+https://github.com/highlrang/spring/tree/master/haksa/src/main/java/com/myproject/myweb/RegisterController.java
 
 ``` java
 @RequestMapping(value="/register3", method=RequestMethod.POST)
@@ -92,7 +92,7 @@ https://github.com/highlrang/spring/haksa/src/main/java/com/myproject/myweb/Regi
 ------------------------------------------------------
 
 ## VO
-https://github.com/highlrang/spring/haksa/src/main/java/com/myproject/myweb/domain/RegisteredVO.java
+https://github.com/highlrang/spring/tree/master/haksa/src/main/java/com/myproject/myweb/domain/RegisteredVO.java
 
 ```java
 public class RegisteredVO {
@@ -119,7 +119,7 @@ public class RegisteredVO {
 -------------------------------------------------------------------
 
 ## DAO
-https://github.com/highlrang/spring/haksa/src/main/java/com/myproject/myweb/persistence/MajorDAO.java
+https://github.com/highlrang/spring/tree/master/haksa/src/main/java/com/myproject/myweb/persistence/MajorDAO.java
 
 ```java
 @Service
@@ -144,7 +144,7 @@ public class MajorDAO{
 --------------------------------------------------------
 
 ## Mapper
-https://github.com/highlrang/spring/haksa/src/main/resources/mappers/majorMapper.xml
+https://github.com/highlrang/spring/tree/master/haksa/src/main/resources/mappers/majorMapper.xml
 
 + 전달받은 변수를 활용하여 등록 테이블 insert 및 select SQL문
 
@@ -176,7 +176,7 @@ https://github.com/highlrang/spring/haksa/src/main/resources/mappers/majorMapper
 -----------------------------------------------------------------------
 
 # jsp
-https://github.com/highlrang/spring/haksa/src/main/webapp/WEB-INF/views/registered.jsp
+https://github.com/highlrang/spring/tree/master/haksa/src/main/webapp/WEB-INF/views/registered.jsp
 
 1. 최종 강의 신청 페이지
 ```jsp
@@ -235,6 +235,8 @@ https://github.com/highlrang/spring/haksa/src/main/webapp/WEB-INF/views/register
 ```
 
 2. 강의 신청 후 신청 목록 보는 페이지
+https://github.com/highlrang/spring/tree/master/haksa/src/main/webapp/WEB-INF/views/register2.jsp
+
 ```jsp
 <body>
 <jsp:include page="base.jsp"></jsp:include>
