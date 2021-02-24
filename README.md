@@ -176,7 +176,7 @@ https://github.com/highlrang/spring/tree/master/haksa/src/main/resources/mappers
 -----------------------------------------------------------------------
 
 # jsp
-https://github.com/highlrang/spring/tree/master/haksa/src/main/webapp/WEB-INF/views/registered.jsp
+https://github.com/highlrang/spring/tree/master/haksa/src/main/webapp/WEB-INF/views/registered1.jsp
 
 1. 최종 강의 신청 페이지
 ```jsp
