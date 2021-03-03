@@ -4,86 +4,78 @@
 + 주석 중심으로 살펴봐주세요.
 
 ## Controller
-https://github.com/highlrang/spring/tree/master/haksa/src/main/java/com/myproject/myweb/RegisterController.java
 
 ``` java
 @RequestMapping(value="/register3", method=RequestMethod.POST)
 	public ModelAndView goRegister2(HttpServletRequest httpServletRequest) {
 		ModelAndView mav = new ModelAndView();
-	
 		String lec_name = httpServletRequest.getParameter("course");
-		Integer stu_num = Integer.valueOf(httpServletRequest.getParameter("stu_num"));
 		String maj_name = httpServletRequest.getParameter("maj_name");
 		String lec_sem = httpServletRequest.getParameter("lec_sem");
+		Integer stu_num = Integer.valueOf(httpServletRequest.getParameter("stu_num"));
 		Integer reg_count = 0;
 		String msg = "";
 		
-    
     # 신청한 강의인지 DB에서 확인
-		String answer = "";
-		List<RegisteredVO> checklec = dao.selectRegistered(stu_num);
-		for(RegisteredVO a : checklec) {
-			if(a.getLec_name().equals(lec_name)){
-				answer = "true";
-			}
-		}
-		
+		List<RegisteredVO> alreadyRegistered = dao.selectRegistered(stu_num);
     # 이미 신청한 강의인 경우
-		if(answer == "true"){
-			msg = "이미 신청한 강의입니다.";
-			
-      
+		if(alreadyRegistered.contain(lec_name)){
+    			msg = "이미 신청한 강의입니다.";
+
     # 미신청 강의인 경우
 		}else{
-			RegisterVO vo3 = new RegisterVO();
-			vo3.setLec_sem(lec_sem);
-			vo3.setLec_name(lec_name);
-   # 신청한 모든 수강생의 수를 뽑는 majorDAO의 메서드
-			RegisterVO beforeCheck = dao.selectMaxCount(vo3); 
+    # VO 값 set
+			RegisterVO voForNum = new RegisterVO();
+			voForNum.setLec_sem(lec_sem);
+			voForNum.setLec_name(lec_name);
+			
+   # 신청한 모든 수강생의 "수"를 뽑는 majorDAO의 메서드
+			RegisterVO numCheckBeforeRegister = dao.selectMaxCount(voForNum); 
 			
 			try {
         # 최대 신청 인원이 초과된 경우
-				if(beforeCheck.getReg_count() >= beforeCheck.getLec_limit()) {
-					RegisterVO vo4 = new RegisterVO();
-					vo4.setLec_name(lec_name);
-					vo4.setLec_sem(lec_sem);
-					reg_count = dao.selectMinCount(vo4) - 1;
+				if(numCheckBeforeRegister.getReg_count() >= numCheckBeforeRegister.getLec_limit()) {
+					RegisterVO voForWait = new RegisterVO();
+					voForWait.setLec_name(lec_name);
+					voForWait.setLec_sem(lec_sem);
+					reg_count = dao.selectMinCount(voForWait) - 1;
 					
 					msg = "수강인원 초과로 " + lec_name + " 강의가 대기처리 되었습니다.";
 					
         # 수강 자리가 남아 신청 가능한 경우  
 				}else{
-					reg_count = beforeCheck.getReg_count() + 1;
+					reg_count = numCheckBeforeRegister.getReg_count() + 1;
 					msg = lec_name + " 수강신청 되었습니다.";
 				}
 			
-      # 신청인원이 없을 경우(null)
+      # 신청인원이 없을 경우(null 반환)
 			}catch(NullPointerException e) {
 				reg_count = 1;
 				msg = lec_name + " 수강신청 되었습니다.";
 			}	
 			
-			RegisterVO vo = new RegisterVO(); 
-			vo.setStu_num(stu_num);
-			vo.setLec_name(lec_name);
-			vo.setLec_sem(lec_sem);
-			vo.setReg_count(reg_count);         # 강의 신청한 학생 수 update
-			dao.insertRegister(vo);             # 최종 수강신청 테이블에 insert
+			RegisterVO voForRegister = new RegisterVO(); 
+			voForRegister.setStu_num(stu_num);
+			voForRegister.setLec_name(lec_name);
+			voForRegister.setLec_sem(lec_sem);
+			voForRegister.setReg_count(reg_count);         # 강의 신청한 학생 수 - 각 경우에서 정의됨
+			dao.insertRegister(voForRegister);             # 최종 수강신청 테이블에 insert
 		}
 
     
-    # 다시 신청 페이지로 돌아갈 때 message(변수) 전달을 위해 redirect가 아닌 ModelAndView 사용
-		MultiValuedMap<String, String> val = new ArrayListValuedHashMap<String, String>();
+    # 다시 신청 페이지로 돌아갈 때 msg(변수) 전달을 위해 redirect가 아닌 ModelAndView 사용
+    
+		MultiValuedMap<String, String> lecturePushList = new ArrayListValuedHashMap<String, String>();
 		List<CourseVO> courseList = dao.selectCourse(maj_name);
-		for(CourseVO vo2 : courseList) {
-			val.put(vo2.getLec_name(), vo2.getLec_prof() + " 교수");
-			val.put(vo2.getLec_name(), vo2.getLec_time());
+		for(CourseVO voForCourse : courseList) {
+			lecturePushList.put(voForCourse.getLec_name(), vo2.getLec_prof() + " 교수");
+			lecturePuchList.put(voForCourse.getLec_name(), vo2.getLec_time());
 		}
 		mav.setViewName("register2");
-		mav.addObject("msg", msg); //
+		mav.addObject("msg", msg); 				# 각 경우에서 정의된 msg 전달
 		mav.addObject("stu_num", stu_num);
 		mav.addObject("maj_name", maj_name);
-		mav.addObject("val", val);
+		mav.addObject("val", lecturePushList);
 		mav.addObject("lec_sem", lec_sem);
 		
 		return mav;
@@ -92,7 +84,6 @@ https://github.com/highlrang/spring/tree/master/haksa/src/main/java/com/myprojec
 ------------------------------------------------------
 
 ## VO
-https://github.com/highlrang/spring/tree/master/haksa/src/main/java/com/myproject/myweb/domain/RegisteredVO.java
 
 ```java
 public class RegisteredVO {
@@ -119,7 +110,6 @@ public class RegisteredVO {
 -------------------------------------------------------------------
 
 ## DAO
-https://github.com/highlrang/spring/tree/master/haksa/src/main/java/com/myproject/myweb/persistence/MajorDAO.java
 
 ```java
 @Service
@@ -144,7 +134,6 @@ public class MajorDAO{
 --------------------------------------------------------
 
 ## Mapper
-https://github.com/highlrang/spring/tree/master/haksa/src/main/resources/mappers/majorMapper.xml
 
 + 전달받은 변수를 활용하여 등록 테이블 insert 및 select SQL문
 
@@ -176,7 +165,6 @@ https://github.com/highlrang/spring/tree/master/haksa/src/main/resources/mappers
 -----------------------------------------------------------------------
 
 # jsp
-https://github.com/highlrang/spring/tree/master/haksa/src/main/webapp/WEB-INF/views/registered1.jsp
 
 1. 최종 강의 신청 페이지
 ```jsp
@@ -235,7 +223,6 @@ https://github.com/highlrang/spring/tree/master/haksa/src/main/webapp/WEB-INF/vi
 ```
 
 2. 강의 신청 후 신청 목록 보는 페이지
-https://github.com/highlrang/spring/tree/master/haksa/src/main/webapp/WEB-INF/views/register2.jsp
 
 ```jsp
 <body>
