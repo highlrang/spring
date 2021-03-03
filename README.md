@@ -16,24 +16,23 @@
 		Integer reg_count = 0;
 		String msg = "";
 		
-    # 신청한 강의인지 DB에서 확인
+		# 신청한 강의인지 DB에서 확인
 		List<RegisteredVO> alreadyRegistered = dao.selectRegistered(stu_num);
-    # 이미 신청한 강의인 경우
+
+   		# 이미 신청한 강의인 경우
 		if(alreadyRegistered.contain(lec_name)){
     			msg = "이미 신청한 강의입니다.";
 
-    # 미신청 강의인 경우
+   		# 미신청 강의인 경우 신청하기 위해 아래의 코드 진행
 		}else{
-    # VO 값 set
+			# 1. 신청한 모든 수강생의 "수"를 뽑는 majorDAO의 메서드
 			RegisterVO voForNum = new RegisterVO();
 			voForNum.setLec_sem(lec_sem);
 			voForNum.setLec_name(lec_name);
-			
-   # 신청한 모든 수강생의 "수"를 뽑는 majorDAO의 메서드
 			RegisterVO numCheckBeforeRegister = dao.selectMaxCount(voForNum); 
 			
 			try {
-        # 최대 신청 인원이 초과된 경우
+        			# 1-1. 최대 신청 인원이 초과된 경우
 				if(numCheckBeforeRegister.getReg_count() >= numCheckBeforeRegister.getLec_limit()) {
 					RegisterVO voForWait = new RegisterVO();
 					voForWait.setLec_name(lec_name);
@@ -42,13 +41,13 @@
 					
 					msg = "수강인원 초과로 " + lec_name + " 강의가 대기처리 되었습니다.";
 					
-        # 수강 자리가 남아 신청 가능한 경우  
+        			# 1-2. 수강 자리가 남아 신청 가능한 경우  
 				}else{
 					reg_count = numCheckBeforeRegister.getReg_count() + 1;
 					msg = lec_name + " 수강신청 되었습니다.";
 				}
 			
-      # 신청인원이 없을 경우(null 반환)
+        		# 1-3. 신청인원이 없을 경우(null 반환)
 			}catch(NullPointerException e) {
 				reg_count = 1;
 				msg = lec_name + " 수강신청 되었습니다.";
@@ -63,8 +62,8 @@
 		}
 
     
-    # 다시 신청 페이지로 돌아갈 때 msg(변수) 전달을 위해 redirect가 아닌 ModelAndView 사용
-    
+    		# 다시 신청 페이지로 돌아갈 때 msg(변수) 전달을 위해 redirect가 아닌 ModelAndView 사용
+		# 신청 페이지에는 학생이 선택한 전공의 강의들이 목록으로 나와있기에 강의 리스트 등을 변수로 
 		MultiValuedMap<String, String> lecturePushList = new ArrayListValuedHashMap<String, String>();
 		List<CourseVO> courseList = dao.selectCourse(maj_name);
 		for(CourseVO voForCourse : courseList) {
@@ -72,7 +71,7 @@
 			lecturePuchList.put(voForCourse.getLec_name(), vo2.getLec_time());
 		}
 		mav.setViewName("register2");
-		mav.addObject("msg", msg); 				# 각 경우에서 정의된 msg 전달
+		mav.addObject("msg", msg); 					# 각 경우에서 정의된 msg 전달
 		mav.addObject("stu_num", stu_num);
 		mav.addObject("maj_name", maj_name);
 		mav.addObject("val", lecturePushList);
@@ -122,11 +121,11 @@ public class MajorDAO{
 	
   ...
 	public void insertRegister(RegisterVO vo) {
-		sqlSession.insert(InsertRegister, vo);          # insert 메서드(DB 기능) 실행
+		sqlSession.insert(InsertRegister, vo);          			# insert 메서드(DB 기능) 실행
 	}
   
 	public List<RegisteredVO> selectRegistered(int stu_number) {
-		return sqlSession.selectList(SelectRegister, stu_number);        # select 메서드(DB 기능) 실행
+		return sqlSession.selectList(SelectRegister, stu_number);        	# select 메서드(DB 기능) 실행
 	}
 }
 ```
@@ -182,7 +181,7 @@ public class MajorDAO{
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script>
 
-# response 결과를 변수(msg)로 전달하여 alert 방식으로 화면에 띄우기
+    # response 결과를 변수(msg)로 전달하여 alert 방식으로 화면에 띄우기
     $(function(){
         var msg = "<c:out value="${msg}" />"
         if(msg != ""){
@@ -202,7 +201,7 @@ public class MajorDAO{
 	# 전달받은 강의 리스트를 for문으로 나열 
 	<c:forEach var="i" items="${val.keySet()}"> 
   
-  # form post submit 방식으로 각 강의마다 강의 신청 버튼
+  	    # form post submit 방식으로 각 강의마다 강의 신청 버튼
 	    <form action="register3" method="post"> 
 		    <span style="margin: 3%;"> <span style="font-weight: bold;">${i}</span> &ensp;&ensp;
 		    	<span><c:forEach var="j" items="${val.get(i)}">${j}&ensp;&ensp;&ensp;</c:forEach></span>
@@ -210,7 +209,7 @@ public class MajorDAO{
 		    </span>
 		    <input type="submit" value="수강신청"/>
         
-   # DB와의 상호작용에 필요한 파라미터들 전달     
+   			# DB와의 상호작용에 필요한 파라미터들 hidden으로 담아서 전달     
 			<input type="hidden" value="${stu_num}" name="stu_num"/>    
 			<input type="hidden" value="${maj_name}" name="maj_name"/>
 			<input type="hidden" value="${lec_sem}" name="lec_sem"/>
@@ -230,46 +229,46 @@ public class MajorDAO{
 	
 	<div style="margin-left: 3%">
 		<h3>수강신청 내역</h3><br>
-    # 신청한 강의 내역
-    # 강의가 list의 key에 위치 - key for문
-			<c:forEach var="i" items="${majList.keySet()}"> 
-				<span style="display: inline-block; width: 800px;">
-					<span style="display: inline-block; width: 150px; font-weight: bold;">${i}</span>
+    		
+		# 강의가 list의 key에 위치 - key for문
+		<c:forEach var="i" items="${majList.keySet()}"> 
+			<span style="display: inline-block; width: 800px;">
+				<span style="display: inline-block; width: 150px; font-weight: bold;">${i}</span>
 					
-       # 전공 리스트에서 각 강의의 소속 전공 출력
-					<c:forEach var="j" items="${majList.get(i)}">
-						<span style="display: inline-block; width: 150px;">${j}</span>
-					</c:forEach>
+				# 전공 리스트에서 각 강의의 소속 전공 출력
+				<c:forEach var="j" items="${majList.get(i)}">
+					<span style="display: inline-block; width: 150px;">${j}</span>
+				</c:forEach>
 					
-       # 학기 리스트에서 각 강의의 소속 학기 출력
-					<c:forEach var="v" items="${semList.get(i)}">
-						<span style="display: inline-block; width: 150px;">${v}</span>
-					</c:forEach>
+				# 학기 리스트에서 각 강의의 소속 학기 출력
+				<c:forEach var="v" items="${semList.get(i)}">
+					<span style="display: inline-block; width: 150px;">${v}</span>
+				</c:forEach>
 				
-        # 강의 평가리스트에서 각 강의의 평가 데이터 존재 여부 확인
-					<c:forEach var="l" items="${starList.get(i)}">
-						<c:choose>
-            # 강의 없을 경우 강의 평가 페이지로 이동 버튼
-							<c:when test="${l eq 'null'}"> 
-								<span style="display: inline-block; width: 150px;">
-									<form action="writeReview" method="post"> 
-               # form post 방식으로 페이지 이동
-										<input type="submit" value="강의평가하기"/>
-										<input type="hidden" value="${i}" name="lec_name"/>
-									</form>
-								</span>
-							</c:when>
-              # 강의 평가 데이터 있을 경우
-							<c:otherwise> 
-								<span style="display: inline-block; width: 150px;" >
-									강의 평가 완료
-								</span>	
-							</c:otherwise>
-						</c:choose>
-						<br><br>
-					</c:forEach>
-				</span>	
-			</c:forEach>
+				# 강의 평가리스트에서 각 강의의 평가 데이터 존재 여부 확인
+				<c:forEach var="l" items="${starList.get(i)}">
+					<c:choose>
+						# 강의 없을 경우 강의 평가 페이지로 이동 버튼
+						<c:when test="${l eq 'null'}"> 
+							<span style="display: inline-block; width: 150px;">
+								<form action="writeReview" method="post"> 
+								# form post 방식으로 페이지 이동
+									<input type="submit" value="강의평가하기"/>
+									<input type="hidden" value="${i}" name="lec_name"/>
+								</form>
+							</span>
+						</c:when>
+						# 강의 평가 데이터 이미 있을 경우
+						<c:otherwise> 
+							<span style="display: inline-block; width: 150px;" >
+								강의 평가 완료
+							</span>	
+						</c:otherwise>
+					</c:choose>
+					<br><br>
+				</c:forEach>
+			</span>	
+		</c:forEach>
 	</div>
 </body>
 ```
