@@ -7,78 +7,78 @@
 
 ``` java
 @RequestMapping(value="/register3", method=RequestMethod.POST)
-	public ModelAndView goRegister2(HttpServletRequest httpServletRequest) {
-		ModelAndView mav = new ModelAndView();
-		String lec_name = httpServletRequest.getParameter("course");
-		String maj_name = httpServletRequest.getParameter("maj_name");
-		String lec_sem = httpServletRequest.getParameter("lec_sem");
-		Integer stu_num = Integer.valueOf(httpServletRequest.getParameter("stu_num"));
-		Integer reg_count = 0;
-		String msg = "";
-		
-		# 신청한 강의인지 DB에서 확인
-		List<RegisteredVO> alreadyRegistered = dao.selectRegistered(stu_num);
+public ModelAndView goRegister2(HttpServletRequest httpServletRequest) {
+	ModelAndView mav = new ModelAndView();
+	String lec_name = httpServletRequest.getParameter("course");
+	String maj_name = httpServletRequest.getParameter("maj_name");
+	String lec_sem = httpServletRequest.getParameter("lec_sem");
+	Integer stu_num = Integer.valueOf(httpServletRequest.getParameter("stu_num"));
+	Integer reg_count = 0;
+	String msg = "";
 
-   		# 이미 신청한 강의인 경우
-		if(alreadyRegistered.contain(lec_name)){
-    			msg = "이미 신청한 강의입니다.";
+	# 신청한 강의인지 DB에서 확인
+	List<RegisteredVO> alreadyRegistered = dao.selectRegistered(stu_num);
 
-   		# 미신청 강의인 경우 신청하기 위해 아래의 코드 진행
-		}else{
-			# 1. 신청한 모든 수강생의 "수"를 뽑는 majorDAO의 메서드
-			RegisterVO voForNum = new RegisterVO();
-			voForNum.setLec_sem(lec_sem);
-			voForNum.setLec_name(lec_name);
-			RegisterVO numCheckBeforeRegister = dao.selectMaxCount(voForNum); 
-			
-			try {
-        			# 1-1. 최대 신청 인원이 초과된 경우
-				if(numCheckBeforeRegister.getReg_count() >= numCheckBeforeRegister.getLec_limit()) {
-					RegisterVO voForWait = new RegisterVO();
-					voForWait.setLec_name(lec_name);
-					voForWait.setLec_sem(lec_sem);
-					reg_count = dao.selectMinCount(voForWait) - 1;
-					
-					msg = "수강인원 초과로 " + lec_name + " 강의가 대기처리 되었습니다.";
-					
-        			# 1-2. 수강 자리가 남아 신청 가능한 경우  
-				}else{
-					reg_count = numCheckBeforeRegister.getReg_count() + 1;
-					msg = lec_name + " 수강신청 되었습니다.";
-				}
-			
-        		# 1-3. 신청인원이 없을 경우(null 반환)
-			}catch(NullPointerException e) {
-				reg_count = 1;
+	# 이미 신청한 강의인 경우
+	if(alreadyRegistered.contain(lec_name)){
+		msg = "이미 신청한 강의입니다.";
+
+	# 미신청 강의인 경우 신청하기 위해 아래의 코드 진행
+	}else{
+		# 1. 신청한 모든 수강생의 "수"를 뽑는 majorDAO의 메서드
+		RegisterVO voForNum = new RegisterVO();
+		voForNum.setLec_sem(lec_sem);
+		voForNum.setLec_name(lec_name);
+		RegisterVO numCheckBeforeRegister = dao.selectMaxCount(voForNum); 
+
+		try {
+			# 1-1. 최대 신청 인원이 초과된 경우
+			if(numCheckBeforeRegister.getReg_count() >= numCheckBeforeRegister.getLec_limit()) {
+				RegisterVO voForWait = new RegisterVO();
+				voForWait.setLec_name(lec_name);
+				voForWait.setLec_sem(lec_sem);
+				reg_count = dao.selectMinCount(voForWait) - 1;
+
+				msg = "수강인원 초과로 " + lec_name + " 강의가 대기처리 되었습니다.";
+
+			# 1-2. 수강 자리가 남아 신청 가능한 경우  
+			}else{
+				reg_count = numCheckBeforeRegister.getReg_count() + 1;
 				msg = lec_name + " 수강신청 되었습니다.";
-			}	
-			
-			RegisterVO voForRegister = new RegisterVO(); 
-			voForRegister.setStu_num(stu_num);
-			voForRegister.setLec_name(lec_name);
-			voForRegister.setLec_sem(lec_sem);
-			voForRegister.setReg_count(reg_count);         # 강의 신청한 학생 수 - 각 경우에서 정의됨
-			dao.insertRegister(voForRegister);             # 최종 수강신청 테이블에 insert
-		}
+			}
 
-    
-    		# 다시 신청 페이지로 돌아갈 때 msg(변수) 전달을 위해 redirect가 아닌 ModelAndView 사용
-		# 신청 페이지에는 학생이 선택한 전공의 강의들이 목록으로 나와있기에 강의 리스트 등을 변수로 
-		MultiValuedMap<String, String> lecturePushList = new ArrayListValuedHashMap<String, String>();
-		List<CourseVO> courseList = dao.selectCourse(maj_name);
-		for(CourseVO voForCourse : courseList) {
-			lecturePushList.put(voForCourse.getLec_name(), vo2.getLec_prof() + " 교수");
-			lecturePuchList.put(voForCourse.getLec_name(), vo2.getLec_time());
-		}
-		mav.setViewName("register2");
-		mav.addObject("msg", msg); 					# 각 경우에서 정의된 msg 전달
-		mav.addObject("stu_num", stu_num);
-		mav.addObject("maj_name", maj_name);
-		mav.addObject("val", lecturePushList);
-		mav.addObject("lec_sem", lec_sem);
-		
-		return mav;
+		# 1-3. 신청인원이 없을 경우(null 반환)
+		}catch(NullPointerException e) {
+			reg_count = 1;
+			msg = lec_name + " 수강신청 되었습니다.";
+		}	
+
+		RegisterVO voForRegister = new RegisterVO(); 
+		voForRegister.setStu_num(stu_num);
+		voForRegister.setLec_name(lec_name);
+		voForRegister.setLec_sem(lec_sem);
+		voForRegister.setReg_count(reg_count);         # 강의 신청한 학생 수 - 각 경우에서 정의됨
+		dao.insertRegister(voForRegister);             # 최종 수강신청 테이블에 insert
 	}
+
+
+	# 다시 신청 페이지로 돌아갈 때 msg(변수) 전달을 위해 redirect가 아닌 ModelAndView 사용
+	# 신청 페이지에는 학생이 선택한 전공의 강의들이 목록으로 나와있기에 강의 리스트 등을 변수로 
+	MultiValuedMap<String, String> lecturePushList = new ArrayListValuedHashMap<String, String>();
+	List<CourseVO> courseList = dao.selectCourse(maj_name);
+	for(CourseVO voForCourse : courseList) {
+		lecturePushList.put(voForCourse.getLec_name(), vo2.getLec_prof() + " 교수");
+		lecturePuchList.put(voForCourse.getLec_name(), vo2.getLec_time());
+	}
+	mav.setViewName("register2");
+	mav.addObject("msg", msg); 					# 각 경우에서 정의된 msg 전달
+	mav.addObject("stu_num", stu_num);
+	mav.addObject("maj_name", maj_name);
+	mav.addObject("val", lecturePushList);
+	mav.addObject("lec_sem", lec_sem);
+
+	return mav;
+}
 ```
 ------------------------------------------------------
 
@@ -111,7 +111,7 @@ public class RegisteredVO {
 ## DAO
 
 ```java
-@Service
+@Repository
 public class MajorDAO{
 	@Inject
 	private SqlSession sqlSession;    # mybatis 연결
